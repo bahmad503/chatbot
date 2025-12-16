@@ -1,10 +1,9 @@
-"use client"; // ← This is required for useEffect
+"use client";
 
 import { useEffect } from "react";
 
 export default function Home() {
   useEffect(() => {
-    // Debug: confirm the container exists
     const container = document.getElementById("chatkit-container");
     if (!container) {
       console.warn("DEBUG: chatkit-container div not found");
@@ -12,7 +11,6 @@ export default function Home() {
       console.log("DEBUG: chatkit-container div exists");
     }
 
-    // Debug: check if ChatKit is loaded yet
     if (window.ChatKit) {
       console.log("DEBUG: ChatKit object exists on window");
     } else {
@@ -28,7 +26,7 @@ export default function Home() {
         id="chatkit-container"
         style={{ height: "600px", width: "100%", border: "1px dashed red" }}
       >
-        {/* Red border for debugging */}
+        {/* Red border to help with debugging */}
       </div>
     </main>
   );
