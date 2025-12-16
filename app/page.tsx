@@ -1,3 +1,5 @@
+"use client"; // ← This is required for useEffect
+
 import { useEffect } from "react";
 
 export default function Home() {
@@ -26,7 +28,7 @@ export default function Home() {
         id="chatkit-container"
         style={{ height: "600px", width: "100%", border: "1px dashed red" }}
       >
-        {/* Red border to make it visible during debugging */}
+        {/* Red border for debugging */}
       </div>
     </main>
   );
