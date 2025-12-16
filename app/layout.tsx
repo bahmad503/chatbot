@@ -54,6 +54,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const openAiDomainKey = process.env.NEXT_PUBLIC_OPENAI_DOMAIN_KEY;
+  const chatKitWorkflowId = process.env.NEXT_PUBLIC_CHATKIT_WORKFLOW_ID;
 
   return (
     <html
@@ -81,7 +82,7 @@ export default function RootLayout({
             <script
               // biome-ignore lint/security/noDangerouslySetInnerHtml: "ChatKit initialization requires inline script"
               dangerouslySetInnerHTML={{
-                __html: `(function(){var dk="${openAiDomainKey}";function init(){if(window.ChatKit&&window.ChatKit.init){window.ChatKit.init({domainKey:dk});}else{setTimeout(init,100);}}init();})();`,
+                __html: `(function(){var dk="${openAiDomainKey}";var wf="${chatKitWorkflowId ?? ""}";function init(){if(window.ChatKit&&window.ChatKit.init){var o={domainKey:dk};if(wf){o.workflowId=wf;}window.ChatKit.init(o);}else{setTimeout(init,100);}}init();})();`,
               }}
             />
           </>
