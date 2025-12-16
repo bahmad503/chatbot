@@ -50,27 +50,30 @@ export async function POST(request: Request) {
     content: message.parts[0].text
   });
 
-  // Run assistant
-  const run = await openai.beta.threads.runs.create(thread.id, {
-    assistant_id: process.env.OPENAI_ASSISTANT_ID!
-  });
+// Change this section (lines 56-68):
 
-  const runId = run.id as string;
-  const threadId = thread.id as string;
+// Run assistant
+const run = await openai.beta.threads.runs.create(thread.id, {
+  assistant_id: process.env.OPENAI_ASSISTANT_ID!
+});
 
-  // Poll for completion
-  let runStatus = await openai.beta.threads.runs.retrieve(threadId, runId);
-  
-  while (runStatus.status !== 'completed') {
-    if (runStatus.status === 'failed') {
-      return Response.json({ error: 'Assistant failed' }, { status: 500 });
-    }
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    runStatus = await openai.beta.threads.runs.retrieve(threadId, runId);
+// Poll for completion - FIX HERE
+let runStatus = await openai.beta.threads.runs.retrieve(run.id, {
+  thread_id: thread.id
+});
+
+while (runStatus.status !== 'completed') {
+  if (runStatus.status === 'failed') {
+    return Response.json({ error: 'Assistant failed' }, { status: 500 });
   }
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  runStatus = await openai.beta.threads.runs.retrieve(run.id, {
+    thread_id: thread.id
+  });
+}
 
   // Get response
-  const messages = await openai.beta.threads.messages.list(threadId);
+  const messages = await openai.beta.threads.messages.list(thread.id);
   const assistantMessage = messages.data[0];
   const responseText = assistantMessage.content[0].type === 'text' 
     ? assistantMessage.content[0].text.value 
