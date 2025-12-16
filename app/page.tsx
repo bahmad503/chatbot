@@ -18,7 +18,12 @@ export default function Home() {
       <p>The chatbot will appear automatically below:</p>
       <div
         id="chatkit-container"
-        style={{ height: "600px", width: "100%", border: "1px dashed red" }}
+        style={{
+          height: "600px",
+          width: "100%",
+          border: "1px dashed red",
+          position: "relative",
+        }}
       />
     </main>
   );

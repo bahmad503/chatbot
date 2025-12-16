@@ -15,7 +15,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <head />
       <body>
-        {/* Client-side ChatKit loader */}
         {domainKey && <ChatKitLoader domainKey={domainKey} workflowId={workflowId} />}
         {children}
       </body>
