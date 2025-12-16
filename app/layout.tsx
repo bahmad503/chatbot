@@ -1,6 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import ChatKitLoader from "./components/ChatKitLoader"; // Client Component
+import ChatKitLoader from "./components/ChatKitLoader";
 
 export const metadata: Metadata = {
   title: "AI Chatbot",

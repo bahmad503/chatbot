@@ -5,17 +5,11 @@ import { useEffect } from "react";
 export default function Home() {
   useEffect(() => {
     const container = document.getElementById("chatkit-container");
-    if (!container) {
-      console.warn("DEBUG: chatkit-container div not found");
-    } else {
-      console.log("DEBUG: chatkit-container div exists");
-    }
+    if (!container) console.warn("DEBUG: chatkit-container div not found");
+    else console.log("DEBUG: chatkit-container div exists");
 
-    if (window.ChatKit) {
-      console.log("DEBUG: ChatKit object exists on window");
-    } else {
-      console.warn("DEBUG: ChatKit object NOT found on window");
-    }
+    if (window.ChatKit) console.log("DEBUG: ChatKit object exists on window");
+    else console.warn("DEBUG: ChatKit object NOT found on window");
   }, []);
 
   return (
@@ -25,9 +19,7 @@ export default function Home() {
       <div
         id="chatkit-container"
         style={{ height: "600px", width: "100%", border: "1px dashed red" }}
-      >
-        {/* Red border to help with debugging */}
-      </div>
+      />
     </main>
   );
 }
