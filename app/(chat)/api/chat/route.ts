@@ -41,71 +41,89 @@ export async function POST(request: Request) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  // Create thread
-  const thread = await openai.beta.threads.create();
-
-  // Add user message
-  await openai.beta.threads.messages.create(thread.id, {
-    role: 'user',
-    content: message.parts[0].text
-  });
-
-// Change this section (lines 56-68):
-
-// Run assistant
-const run = await openai.beta.threads.runs.create(thread.id, {
-  assistant_id: process.env.OPENAI_ASSISTANT_ID!
-});
-
-// Poll for completion - FIX HERE
-let runStatus = await openai.beta.threads.runs.retrieve(run.id, {
-  thread_id: thread.id
-});
-
-while (runStatus.status !== 'completed') {
-  if (runStatus.status === 'failed') {
-    return Response.json({ error: 'Assistant failed' }, { status: 500 });
+  // Check for required environment variables
+  if (!process.env.OPENAI_API_KEY) {
+    return Response.json({ 
+      error: 'OPENAI_API_KEY environment variable is not set' 
+    }, { status: 500 });
   }
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  runStatus = await openai.beta.threads.runs.retrieve(run.id, {
-    thread_id: thread.id
-  });
-}
 
-  // Get response
-  const messages = await openai.beta.threads.messages.list(thread.id);
-  const assistantMessage = messages.data[0];
-  const responseText = assistantMessage.content[0].type === 'text' 
-    ? assistantMessage.content[0].text.value 
-    : '';
+  if (!process.env.OPENAI_ASSISTANT_ID) {
+    return Response.json({ 
+      error: 'OPENAI_ASSISTANT_ID environment variable is not set. This route requires an Assistant ID from OpenAI Assistants API. If you are using ChatKit/Agent Builder, you do not need this route.' 
+    }, { status: 503 });
+  }
 
-  // Save to database
-  await saveMessages({
-    messages: [
-      {
-        chatId: id,
-        id: message.id,
-        role: 'user',
-        parts: message.parts,
-        attachments: [],
-        createdAt: new Date(),
-      },
-      {
-        chatId: id,
+  try {
+    // Create thread
+    const thread = await openai.beta.threads.create();
+
+    // Add user message
+    await openai.beta.threads.messages.create(thread.id, {
+      role: 'user',
+      content: message.parts[0].text
+    });
+
+    // Run assistant
+    const run = await openai.beta.threads.runs.create(thread.id, {
+      assistant_id: process.env.OPENAI_ASSISTANT_ID!
+    });
+
+    // Poll for completion
+    let runStatus = await openai.beta.threads.runs.retrieve(run.id, {
+      thread_id: thread.id
+    });
+
+    while (runStatus.status !== 'completed') {
+      if (runStatus.status === 'failed') {
+        return Response.json({ error: 'Assistant failed' }, { status: 500 });
+      }
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      runStatus = await openai.beta.threads.runs.retrieve(run.id, {
+        thread_id: thread.id
+      });
+    }
+
+    // Get response
+    const messages = await openai.beta.threads.messages.list(thread.id);
+    const assistantMessage = messages.data[0];
+    const responseText = assistantMessage.content[0].type === 'text' 
+      ? assistantMessage.content[0].text.value 
+      : '';
+
+    // Save to database
+    await saveMessages({
+      messages: [
+        {
+          chatId: id,
+          id: message.id,
+          role: 'user',
+          parts: message.parts,
+          attachments: [],
+          createdAt: new Date(),
+        },
+        {
+          chatId: id,
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          parts: [{ type: 'text', text: responseText }],
+          attachments: [],
+          createdAt: new Date(),
+        }
+      ]
+    });
+
+    return Response.json({ 
+      message: {
         id: crypto.randomUUID(),
         role: 'assistant',
-        parts: [{ type: 'text', text: responseText }],
-        attachments: [],
-        createdAt: new Date(),
+        parts: [{ type: 'text', text: responseText }]
       }
-    ]
-  });
-
-  return Response.json({ 
-    message: {
-      id: crypto.randomUUID(),
-      role: 'assistant',
-      parts: [{ type: 'text', text: responseText }]
-    }
-  });
+    });
+  } catch (error: any) {
+    console.error('Chat API error:', error);
+    return Response.json({ 
+      error: error.message || 'Failed to process chat request' 
+    }, { status: 500 });
+  }
 }
