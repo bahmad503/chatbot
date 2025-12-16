@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Chatbot",
-  description: "ChatKit chatbot",
+  title: "AI Chatbot",
+  description: "ChatKit + OpenAI Agent",
 };
 
 export default function RootLayout({
@@ -17,7 +17,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {domainKey && workflowId && (
+        {domainKey && (
           <>
             <script
               src="https://cdn.platform.openai.com/deployments/chatkit/chatkit.js"
@@ -25,21 +25,20 @@ export default function RootLayout({
             />
             <script
               dangerouslySetInnerHTML={{
-                __html: `
-                  (function () {
-                    function init() {
-                      if (window.ChatKit && window.ChatKit.init) {
-                        window.ChatKit.init({
-                          domainKey: "${domainKey}",
-                          workflowId: "${workflowId}",
-                        });
-                      } else {
-                        setTimeout(init, 100);
-                      }
+                __html: `(function(){
+                  var dk="${domainKey}";
+                  var wf="${workflowId || ""}";
+                  function init(){
+                    if(window.ChatKit && window.ChatKit.init){
+                      var cfg={ domainKey: dk };
+                      if(wf) cfg.workflowId = wf;
+                      window.ChatKit.init(cfg);
+                    } else {
+                      setTimeout(init,100);
                     }
-                    init();
-                  })();
-                `,
+                  }
+                  init();
+                })();`,
               }}
             />
           </>
