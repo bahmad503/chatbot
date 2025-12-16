@@ -53,6 +53,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const openAiDomainKey = process.env.NEXT_PUBLIC_OPENAI_DOMAIN_KEY;
+
   return (
     <html
       className={`${geist.variable} ${geistMono.variable}`}
@@ -70,6 +72,20 @@ export default function RootLayout({
             __html: THEME_COLOR_SCRIPT,
           }}
         />
+        {openAiDomainKey ? (
+          <>
+            <script
+              src="https://cdn.platform.openai.com/deployments/chatkit/chatkit.js"
+              async
+            />
+            <script
+              // biome-ignore lint/security/noDangerouslySetInnerHtml: "ChatKit initialization requires inline script"
+              dangerouslySetInnerHTML={{
+                __html: `window.ChatKit = window.ChatKit || {}; if (window.ChatKit.init) { window.ChatKit.init({ domainKey: "${openAiDomainKey}" }); }`,
+              }}
+            />
+          </>
+        ) : null}
       </head>
       <body className="antialiased">
         <ThemeProvider
