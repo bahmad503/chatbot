@@ -81,7 +81,7 @@ export default function RootLayout({
             <script
               // biome-ignore lint/security/noDangerouslySetInnerHtml: "ChatKit initialization requires inline script"
               dangerouslySetInnerHTML={{
-                __html: `window.ChatKit = window.ChatKit || {}; if (window.ChatKit.init) { window.ChatKit.init({ domainKey: "${openAiDomainKey}" }); }`,
+                __html: `(function(){var dk="${openAiDomainKey}";function init(){if(window.ChatKit&&window.ChatKit.init){window.ChatKit.init({domainKey:dk});}else{setTimeout(init,100);}}init();})();`,
               }}
             />
           </>
